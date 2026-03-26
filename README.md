@@ -107,6 +107,14 @@ The project includes:
 
 ---
 
+## 🔗 Demo
+
+Interactive prototype (offline):
+
+Open file: `demo/index.html`
+
+---
+
 ## Author
 
 **Valeria Kunichik**  
