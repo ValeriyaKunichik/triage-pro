@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>TRIAGE PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--brand:#2563eb;--muted:#6b7280;--bg:#f3f4f6;--line:#e5e7eb;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#111827;}
+.shell{max-width:1100px;margin:0 auto;padding:16px 24px 32px;}
+h1{margin:0 0 6px 0;font-size:26px;font-weight:700;}
+small{color:#6b7280;}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 20px;margin:12px 0;box-shadow:0 4px 12px rgba(15,23,42,.04);}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;}
+label{font-size:14px;color:#374151;}
+input[type=number]{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px;font-size:14px;}
+input[type=checkbox]{margin-right:6px;}
+.btn{padding:10px 14px;border:none;border-radius:10px;background:var(--brand);color:#fff;font-weight:600;cursor:pointer;font-size:14px;}
+.btn.muted{background:var(--muted);}
+.btn + .btn{margin-left:8px;}
+.kpi{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 2px;}
+.box{background:#f3f4f6;border-radius:10px;padding:10px 12px;font-size:14px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;}
+.badge.ok{background:#dcfce7;color:#166534;}
+.badge.no{background:#fee2e2;color:#991b1b;}
+pre{background:#fafafa;border:1px dashed var(--line);padding:12px;border-radius:10px;white-space:pre-wrap;font-size:13px;max-height:260px;overflow:auto;}
+.switch{display:flex;flex-wrap:wrap;gap:8px;}
+.pill{padding:6px 12px;border-radius:999px;border:1px solid #d1d5db;cursor:pointer;font-size:13px;background:#fff;}
+.pill.active{background:#2563eb;border-color:#1d4ed8;color:#fff;}
+@media (max-width:768px){
+  .shell{padding:12px 12px 24px;}
+  h1{font-size:22px;}
+  .card{padding:12px 14px;margin:10px 0;}
+  .btn{width:100%;margin-top:8px;}
+  .btn + .btn{margin-left:0;}
+  .kpi{flex-direction:column;}
+  pre{max-height:200px;}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<h1>TRIAGE PRO</h1>
+<small>Офлайн-калькулятор по симптомам и коморбидности</small>
+
+<div class="card">
+  <div class="switch" id="thrSwitch"></div>
+  <small>Выбор порога TRIAGE</small>
+</div>
+
+<div class="card">
+  <div class="grid">
+    <div><label>Возраст (лет)</label><input type="number" id="age" value="60" min="0" max="120" step="1" inputmode="numeric"></div>
+    <div><label><input type="checkbox" id="lowox"> Низкая сатурация</label></div>
+    <div><label><input type="checkbox" id="respdist"> Респираторный дистресс</label></div>
+    <div><label><input type="checkbox" id="dysp"> Одышка</label></div>
+    <div><label><input type="checkbox" id="fever"> Лихорадка</label></div>
+    <div><label><input type="checkbox" id="cough"> Кашель</label></div>
+    <div><label><input type="checkbox" id="dm"> Диабет</label></div>
+    <div><label><input type="checkbox" id="cvd"> ССЗ/инсульт</label></div>
+    <div><label><input type="checkbox" id="morbmiss"> Нет данных по коморбидности</label></div>
+    <div><label><input type="checkbox" id="virmiss"> Нет данных по вирусным симптомам</label></div>
+  </div>
+  <br>
+  <div>
+    <button class="btn" type="button" onclick="runCalc()">Рассчитать</button>
+    <button class="btn muted" type="button" onclick="resetForm()">Очистить</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Результат</h3>
+  <div id="out"></div>
+</div>
+
+</div>
+
+<script>
+var SURR = {"nodes": [{"idx": 0, "feature": "age_years_z", "threshold": 0.006191700231283903, "left": 1, "right": 16, "prob1": 0.5000000000005927}, {"idx": 1, "feature": "comorb_other_morbidity_missing", "threshold": 0.5, "left": 2, "right": 9, "prob1": 0.17810774639328142}, {"idx": 2, "feature": "sym_low_oxygen_saturation", "threshold": 0.5, "left": 3, "right": 6, "prob1": 0.42674613845166176}, {"idx": 3, "feature": "age_years", "threshold": 41.5, "left": 4, "right": 5, "prob1": 0.1667677469932947}, {"idx": 4, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.06846619226712176}, {"idx": 5, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.3611819230782715}, {"idx": 6, "feature": "age_years_z", "threshold": -1.5686582922935486, "left": 7, "right": 8, "prob1": 0.5891135152605879}, {"idx": 7, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.04241761716538008}, {"idx": 8, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.7040262780313662}, {"idx": 9, "feature": "sym_viral_any_missing", "threshold": 0.5, "left": 10, "right": 13, "prob1": 0.10040488902077645}, {"idx": 10, "feature": "age_years_z", "threshold": -0.3343164175748825, "left": 11, "right": 12, "prob1": 0.0738842719902273}, {"idx": 11, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.03179139875018021}, {"idx": 12, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.2161272701211209}, {"idx": 13, "feature": "age_years_z", "threshold": -0.6748245060443878, "left": 14, "right": 15, "prob1": 0.49547244862676304}, {"idx": 14, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.16215403488961574}, {"idx": 15, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.8100588106195996}, {"idx": 16, "feature": "age_years", "threshold": 59.5, "left": 17, "right": 24, "prob1": 0.8852647658754069}, {"idx": 17, "feature": "sym_respiratory_distress", "threshold": 0.5, "left": 18, "right": 21, "prob1": 0.6890689871169677}, {"idx": 18, "feature": "sym_viral_any_missing", "threshold": 0.5, "left": 19, "right": 20, "prob1": 0.5184677721332693}, {"idx": 19, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.4658563923533966}, {"idx": 20, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.9664734613499116}, {"idx": 21, "feature": "sym_low_oxygen_saturation", "threshold": 0.5, "left": 22, "right": 23, "prob1": 0.8439841166594759}, {"idx": 22, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.518668368207013}, {"idx": 23, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.9175713358406404}, {"idx": 24, "feature": "age_years_z", "threshold": 0.516953855752945, "left": 25, "right": 28, "prob1": 0.9731402882152319}, {"idx": 25, "feature": "sym_dyspnea", "threshold": 0.5, "left": 26, "right": 27, "prob1": 0.8886635725186002}, {"idx": 26, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.7250853915598894}, {"idx": 27, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.9590265747638579}, {"idx": 28, "feature": "age_years_z", "threshold": 0.6872079074382782, "left": 29, "right": 30, "prob1": 0.989041606947685}, {"idx": 29, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.9576152337387466}, {"idx": 30, "feature": null, "threshold": null, "left": -1, "right": -1, "prob1": 0.9960136224893732}], "root": 0, "features": ["age_years", "sym_low_oxygen_saturation", "sym_respiratory_distress", "sym_dyspnea", "sym_fever", "sym_cough", "comorb_diabetes", "comorb_cvd", "comorb_other_morbidity_missing", "sym_viral_any_missing", "age_years_z"], "t_triage": 0.2, "age_mean": 51.354530334472656, "age_std": 23.494300842285156};
+var LR = {"intercept": -1.4052289979745967, "coef": {"age_years": 0.7804974251976632, "sym_low_oxygen_saturation": 0.2553032609522097, "sym_respiratory_distress": 0.2850071300736659, "sym_dyspnea": 0.2369286581702362, "sym_fever": 0.017214053229287776, "sym_cough": -0.3217602049275287, "comorb_diabetes": 0.17431417617731437, "comorb_cvd": 0.0, "comorb_other_morbidity_missing": -0.2644172011877653, "sym_viral_any_missing": 0.5212689782872488}, "age_mean": 51.35453732233376, "age_std": 23.494277132227, "features": ["age_years", "sym_low_oxygen_saturation", "sym_respiratory_distress", "sym_dyspnea", "sym_fever", "sym_cough", "comorb_diabetes", "comorb_cvd", "comorb_other_morbidity_missing", "sym_viral_any_missing"]};
+var PRESETS = {"sensitive": {"label": "Чувствительный", "thr": 0.25, "note": "~высокая чувствительность"}, "balanced": {"label": "Баланс", "thr": 0.35, "note": "~PPV около 0.40"}, "strict": {"label": "Строгий", "thr": 0.5, "note": "~высокая специфичность"}};
+
+function sigmoid(x){return 1/(1+Math.exp(-x));}
+
+function traverse(row){
+  var nodes = SURR.nodes;
+  var i = SURR.root;
+  while (true){
+    var n = nodes[i];
+    if (n.feature === null){
+      return {prob:n.prob1};
+    }
+    var v = row[n.feature];
+    var goLeft = (v <= n.threshold);
+    i = goLeft ? n.left : n.right;
+  }
+}
+
+// Клинический профиль пациента
+function humanizePatient(f) {
+  var lines = [];
+  if (!isNaN(f.age_years)) {
+    lines.push("Возраст: " + f.age_years.toFixed(0) + " лет");
+  } else {
+    lines.push("Возраст: —");
+  }
+  function yn(v) { return v ? "да" : "нет"; }
+
+  lines.push("Низкая сатурация: " + yn(f.sym_low_oxygen_saturation));
+  lines.push("Респираторный дистресс: " + yn(f.sym_respiratory_distress));
+  lines.push("Одышка: " + yn(f.sym_dyspnea));
+  lines.push("Лихорадка: " + yn(f.sym_fever));
+  lines.push("Кашель: " + yn(f.sym_cough));
+  lines.push("Диабет: " + yn(f.comorb_diabetes));
+  lines.push("ССЗ/инсульт: " + yn(f.comorb_cvd));
+  lines.push("Нет данных по коморбидности: " + yn(f.comorb_other_morbidity_missing));
+  lines.push("Нет данных по вирусным симптомам: " + yn(f.sym_viral_any_missing));
+
+  var txt = "";
+  for (var i = 0; i < lines.length; i++){
+    txt += "• " + lines[i] + "\n";
+  }
+  return txt;
+}
+
+// Логит-модель риска
+function logisticRisk(f){
+  var age_scaled = (f.age_years - LR.age_mean)/(LR.age_std || 1);
+  var logit = LR.intercept + (LR.coef["age_years"] || 0)*age_scaled;
+  var contribArr = [];
+  contribArr.push("age_years (scaled): " + ((LR.coef["age_years"] || 0)*age_scaled));
+
+  for (var i = 0; i < LR.features.length; i++){
+    var k = LR.features[i];
+    if (k === "age_years") continue;
+    var coefK = LR.coef[k] || 0;
+    var val = +f[k];
+    var c = coefK * val;
+    logit += c;
+    contribArr.push(k + ": " + c);
+  }
+  var p = sigmoid(logit);
+  return {p:p, contrib:contribArr};
+}
+
+function collect(){
+  var ageStr = document.getElementById("age").value;
+  var age = parseFloat(ageStr);
+  if (isNaN(age)) age = 0;
+
+  return {
+    age_years: age,
+    age_years_z:(age - SURR.age_mean)/(SURR.age_std || 1),
+    sym_low_oxygen_saturation:      document.getElementById("lowox").checked ? 1 : 0,
+    sym_respiratory_distress:       document.getElementById("respdist").checked ? 1 : 0,
+    sym_dyspnea:                    document.getElementById("dysp").checked ? 1 : 0,
+    sym_fever:                      document.getElementById("fever").checked ? 1 : 0,
+    sym_cough:                      document.getElementById("cough").checked ? 1 : 0,
+    comorb_diabetes:                document.getElementById("dm").checked ? 1 : 0,
+    comorb_cvd:                     document.getElementById("cvd").checked ? 1 : 0,
+    comorb_other_morbidity_missing: document.getElementById("morbmiss").checked ? 1 : 0,
+    sym_viral_any_missing:          document.getElementById("virmiss").checked ? 1 : 0
+  };
+}
+
+var currentThr = PRESETS["balanced"]["thr"];
+var hasResult = false;
+
+function renderSwitch(){
+  var box = document.getElementById("thrSwitch");
+  box.innerHTML = "";
+  var order = ["sensitive","balanced","strict"];
+
+  for (var i = 0; i < order.length; i++){
+    var key = order[i];
+    var p = PRESETS[key];
+    if (!p) continue;
+    var el = document.createElement("div");
+    var cls = "pill";
+    if (Math.abs(currentThr - p.thr) < 1e-9){
+      cls += " active";
+    }
+    el.className = cls;
+    el.textContent = p.label + " ("+p.thr.toFixed(2)+")";
+    el.title = p.note;
+    el.setAttribute("data-thr", p.thr);
+    el.onclick = (function(thrValue){
+      return function(){
+        currentThr = thrValue;
+        renderSwitch();
+        if (hasResult) runCalc();
+      };
+    })(p.thr);
+    box.appendChild(el);
+  }
+}
+
+function runCalc(){
+  hasResult = true;
+  var f   = collect();
+  var sur = traverse(f);
+  var lr  = logisticRisk(f);
+  var tri = sur.prob >= currentThr;
+
+  var patientText = humanizePatient(f);
+  var contribText = "";
+  for (var i = 0; i < lr.contrib.length; i++){
+    contribText += "- " + lr.contrib[i] + "\n";
+  }
+
+  var html = ""
+    + '<div class="kpi">'
+    +   '<div class="box"><b>TRIAGE:</b> '
+    +       (tri ? '<span class="badge ok">да (направить)</span>' : '<span class="badge no">нет</span>')
+    +   '</div>'
+    +   '<div class="box"><b>p(surrogate)=</b> ' + sur.prob.toFixed(4) + '</div>'
+    +   '<div class="box"><b>Порог TRIAGE:</b> ' + currentThr.toFixed(2) + '</div>'
+    +   '<div class="box"><b>Риск (логит-модель)=</b> ' + (lr.p*100).toFixed(1) + ' %</div>'
+    + '</div>'
+    + '<h4>Клинический профиль пациента</h4><pre>' + patientText + '</pre>'
+    + '<h4 style="margin-top:16px;">Вклады признаков (логит-модель)</h4><pre>' + contribText + '</pre>';
+
+  document.getElementById("out").innerHTML = html;
+}
+
+function resetForm(){
+  var boxes = document.querySelectorAll("input[type=checkbox]");
+  for (var i = 0; i < boxes.length; i++){
+    boxes[i].checked = false;
+  }
+  document.getElementById("age").value = 60;
+  document.getElementById("out").innerHTML = "";
+  hasResult = false;
+}
+
+renderSwitch();
+</script>
+</body>
+</html>
