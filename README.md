@@ -15,11 +15,13 @@ Many existing machine learning models:
 - suffer from limited generalization across time and settings;
 - provide insufficient interpretability for real clinical use.
 
-This project focuses on realistic early prediction under these constraints.
+This project addresses early risk prediction in realistic admission-time settings, where uncertainty is unavoidable and model outputs must remain clinically usable.
 
 ---
 
 ## Pipeline Overview
+
+The pipeline is designed as a full end-to-end workflow, from raw data ingestion to clinically interpretable decision support outputs.
 
 The pipeline includes:
 
@@ -41,35 +43,25 @@ The pipeline includes:
 
 ## Key Features
 
-- Large-scale real-world dataset
+- Large-scale real-world hospitalization data
 - Temporal validation across epidemic years
-- Admission-only feature design (no data leakage)
-- Ensemble of boosting models (LightGBM, XGBoost, HGB)
+- Admission-only feature design to avoid post-admission leakage
+- Ensemble of boosting models (LightGBM, XGBoost, HistGradientBoosting)
 - Calibrated risk probabilities
-- Decision Curve Analysis
-- Fairness evaluation
-- Interpretable surrogate model
-
----
-
-## Project Structure
-
-```text
-triage-pro/
-├── 01_triage_pipeline_public.ipynb # main pipeline
-└── README.md
-```
+- Decision-focused evaluation with Decision Curve Analysis
+- Fairness evaluation across patient subgroups
+- Interpretable surrogate model for ensemble behavior
 
 ---
 
 ## Getting Started
 
-1. Open the notebook:
-   `01_triage_pipeline_public.ipynb`
+To explore the project:
 
-2. Run all cells step by step
-
-3. Review generated outputs (tables, figures, metrics)
+1. Open `01_triage_pipeline_public.ipynb`
+2. Run the notebook sequentially
+3. Review the generated tables, figures, and evaluation outputs
+4. Open `demo/index.html` to inspect the privacy-preserving offline prototype
 
 ---
 
@@ -80,6 +72,8 @@ The repository includes:
 - Logistic Regression (baseline)
 - Gradient Boosting models
 - Ensemble of top-performing models
+
+The modeling strategy emphasizes not only discrimination, but also calibration and practical decision utility under temporal shift.
 
 Evaluation metrics:
 
@@ -94,7 +88,7 @@ Evaluation metrics:
 
 The model is designed for early triage and clinical decision support using only admission-time data.
 
-This reflects real hospital conditions, where detailed diagnostic information may not yet be available.
+This reflects real hospital conditions, where detailed laboratory or imaging information may not yet be available, but decisions still need to be made.
 
 ---
 
@@ -102,31 +96,32 @@ This reflects real hospital conditions, where detailed diagnostic information ma
 
 The project includes:
 
-- calibrated risk probabilities
-- surrogate model for explaining ensemble behavior
+- calibrated risk probabilities for more reliable interpretation of predicted risk
+- a surrogate model to approximate and explain ensemble behavior in a transparent form
 
 ---
 
 ## 🔗 Demo
 
-Interactive prototype (offline):
+Interactive offline prototype:
 
-Open file: `demo/index.html`
+Open `demo/index.html`
 
-This demo contains no patient-level data and is fully privacy-preserving
+The demo contains no patient-level data and is fully privacy-preserving.
 
 ---
 
 ## Author
 
 **Valeria Kunichik**  
-Machine Learning / Data Science / Clinical AI
+Machine Learning and Data Science focused on trustworthy decision support under uncertainty
 
 ---
 
 ## Future Work
 
 - External validation on other countries and datasets
-- Robustness to temporal distribution shift
+- Improved robustness under temporal distribution shift
 - Integration into clinical workflows
 - Extensions with explainable AI methods
+- Validation of decision utility in broader high-stakes settings
