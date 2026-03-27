@@ -113,6 +113,8 @@ Interactive prototype (offline):
 
 Open file: `demo/index.html`
 
+This demo contains no patient-level data and is fully privacy-preserving
+
 ---
 
 ## Author
